@@ -45,7 +45,8 @@ def api_status():
     return jsonify({
         'amadeus': bool(aggregator.amadeus_client_id and not aggregator.amadeus_client_id.startswith('your_')),
         'serpapi': bool(aggregator.serpapi_key and not aggregator.serpapi_key.startswith('your_')),
-        'scraper': True, # Browser scraping is always available if playwright is installed
+        'easemytrip': True, # Web scrapers are always available
+        'cleartrip': True,
     })
 
 

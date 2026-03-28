@@ -287,7 +287,9 @@ class TravelAggregator:
             tasks = [
                 self.get_amadeus_flights(session, origin, destination, departure_date, return_date),
                 self.get_serpapi_flights(session, origin, destination, departure_date, return_date),
-                self.scraper.scrape_easemytrip(origin, destination, departure_date)
+                self.scraper.scrape_easemytrip(origin, destination, departure_date),
+                self.scraper.scrape_cleartrip(origin, destination, departure_date),
+                # self.scraper.scrape_makemytrip(origin, destination, departure_date) # Skipped for now
             ]
 
             raw_results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -339,6 +341,7 @@ class TravelAggregator:
                         'Stops': f.get('stops', 0),
                         'Price (₹)': f.get('price', 0),
                         'Cabin': f.get('cabin_class', ''),
+                        'Booking Link': f.get('booking_url', ''),
                     })
 
                 flight_df = pd.DataFrame(flight_rows)

@@ -16,585 +16,284 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg-primary: #0a0e1a;
-            --bg-secondary: #111827;
-            --bg-card: rgba(17, 24, 39, 0.65);
-            --bg-glass: rgba(255, 255, 255, 0.04);
-            --border-glass: rgba(255, 255, 255, 0.08);
-            --text-primary: #f1f5f9;
+            --bg-primary: #030712;
+            --bg-sidebar: rgba(10, 15, 30, 0.85);
+            --bg-card: rgba(17, 24, 39, 0.6);
+            --bg-glass: rgba(255, 255, 255, 0.03);
+            --border-glass: rgba(255, 255, 255, 0.06);
+            --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
             --accent-1: #6366f1;
-            --accent-2: #8b5cf6;
-            --accent-3: #ec4899;
-            --green: #10b981;
-            --green-glow: rgba(16, 185, 129, 0.25);
-            --amber: #f59e0b;
-            --red: #ef4444;
-            --radius: 16px;
-            --radius-sm: 10px;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --accent-2: #10b981; /* Emerald/Green from mockup */
+            --accent-3: #8b5cf6;
+            --radius: 18px;
+            --radius-sm: 12px;
+            --shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+            --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
-            line-height: 1.6;
+            display: grid;
+            grid-template-columns: 280px 1fr;
         }
 
         /* ── Animated Background ─────────────────────────────── */
         .bg-mesh {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background:
-                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(99,102,241,0.15) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 80% at 80% 90%, rgba(139,92,246,0.12) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 50% at 50% 50%, rgba(236,72,153,0.06) 0%, transparent 70%);
-            animation: meshFloat 20s ease-in-out infinite alternate;
-        }
-        @keyframes meshFloat {
-            0%   { transform: translateY(0) scale(1); }
-            100% { transform: translateY(-30px) scale(1.05); }
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(99,102,241,0.12) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(16,185,129,0.08) 0%, transparent 40%);
         }
 
-        .grain {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.03;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-        }
-
-        /* ── Container ───────────────────────────────────────── */
-        .container {
-            position: relative; z-index: 1;
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        /* ── Header ──────────────────────────────────────────── */
-        .header {
-            padding: 48px 0 32px;
-            text-align: center;
-        }
-        .header .logo {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2.8rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-1), var(--accent-2), var(--accent-3));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: -1px;
-        }
-        .header .tagline {
-            color: var(--text-secondary);
-            font-size: 1.05rem;
-            margin-top: 8px;
-            font-weight: 300;
-        }
-        .api-badges {
-            display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap;
-        }
-        .api-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 5px 14px;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            color: var(--text-muted);
-            transition: var(--transition);
-        }
-        .api-badge.active { border-color: var(--green); color: var(--green); }
-        .api-badge .dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: var(--text-muted);
-        }
-        .api-badge.active .dot {
-            background: var(--green);
-            box-shadow: 0 0 8px var(--green-glow);
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
-        /* ── Search Card ─────────────────────────────────────── */
-        .search-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(24px) saturate(1.4);
-            -webkit-backdrop-filter: blur(24px) saturate(1.4);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius);
-            padding: 36px;
-            box-shadow: var(--shadow);
-            margin-bottom: 40px;
-        }
-        .search-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        .search-grid .full { grid-column: 1 / -1; }
-
-        .form-group { position: relative; }
-        .form-group label {
-            display: block;
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-bottom: 8px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 14px 18px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-sm);
-            color: var(--text-primary);
-            font-size: 1rem;
-            font-family: inherit;
-            transition: var(--transition);
-            outline: none;
-        }
-        .form-group input::placeholder { color: var(--text-muted); }
-        .form-group input:focus {
-            border-color: var(--accent-1);
-            box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
-        }
-
-        /* Autocomplete dropdown */
-        .autocomplete-list {
-            position: absolute;
-            top: 100%;
-            left: 0; right: 0;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-sm);
-            max-height: 240px;
-            overflow-y: auto;
+        /* ── Sidebar ─────────────────────────────────────────── */
+        .sidebar {
+            position: sticky; top: 0; height: 100vh;
+            background: var(--bg-sidebar);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-right: 1px solid var(--border-glass);
+            padding: 40px 24px;
+            display: flex; flex-direction: column; gap: 40px;
             z-index: 100;
-            display: none;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+        }
+
+        .logo-wrap {
+            font-family: 'Outfit', sans-serif;
+            display: flex; align-items: center; gap: 12px;
+            font-size: 1.8rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text; color: transparent;
+        }
+
+        .sidebar-section-title {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 1.2px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group { margin-bottom: 32px; }
+
+        /* Price Slider Customization */
+        .price-range-wrap { margin-top: 12px; }
+        .price-labels { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; }
+        input[type=range] {
+            width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px;
+            appearance: none; outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            appearance: none; width: 18px; height: 18px; background: var(--accent-2);
+            border-radius: 50%; cursor: pointer; border: 3px solid #fff; box-shadow: 0 0 10px var(--accent-2);
+        }
+
+        /* Time Block Buttons */
+        .time-blocks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .time-chip {
+            padding: 10px; border-radius: 10px; border: 1px solid var(--border-glass);
+            background: var(--bg-glass); color: var(--text-secondary);
+            font-size: 0.78rem; text-align: center; cursor: pointer; transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+        }
+        .time-chip:hover { border-color: var(--accent-1); }
+        .time-chip.active { background: var(--accent-1); border-color: var(--accent-1); color: #fff; }
+        .time-chip .icon { font-size: 1.1rem; }
+
+        /* API Badges in Sidebar */
+        .sidebar-badges { display: flex; flex-direction: column; gap: 8px; }
+        .api-badge {
+            display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-muted);
+            padding: 8px 12px; border-radius: 10px; border: 1px solid transparent;
+        }
+        .api-badge.active { color: var(--text-secondary); background: rgba(16, 185, 129, 0.05); }
+        .api-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); }
+        .api-badge.active .dot { background: var(--accent-2); box-shadow: 0 0 8px var(--accent-2); }
+
+        /* ── Main Content ────────────────────────────────────── */
+        .main-content {
+            padding: 60px 5vw;
+            position: relative;
+        }
+
+        .search-hero { margin-bottom: 48px; }
+        .search-hero h2 { font-family: 'Outfit', sans-serif; font-size: 2.4rem; font-weight: 700; margin-bottom: 8px; }
+
+        .search-card {
+            background: var(--bg-card); backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass); border-radius: 20px;
+            padding: 32px; margin-bottom: 40px; box-shadow: var(--shadow);
+        }
+        .search-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: end; }
+        .form-group label { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.5px; }
+        .form-group input { 
+            width: 100%; padding: 14px 16px; background: rgba(0,0,0,0.2); 
+            border: 1px solid var(--border-glass); border-radius: 12px; color: #fff; outline: none;
+        }
+        .search-btn {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3)); 
+            border: none; border-radius: 12px; color: #fff; padding: 14px;
+            font-weight: 700; font-family: 'Outfit'; cursor: pointer; transition: 0.3s;
+        }
+        .search-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99,102,241,0.3); }
+
+        /* ── Results ─────────────────────────────────────────── */
+        .flight-card {
+            background: var(--bg-card); border: 1px solid var(--border-glass);
+            border-radius: 20px; padding: 24px; margin-bottom: 16px;
+            display: grid; grid-template-columns: 180px 1fr 180px; align-items: center; gap: 32px;
+            transition: var(--transition); animation: cardIn 0.5s ease both;
+        }
+        .flight-card:hover { transform: translateY(-4px); border-color: rgba(99,102,241,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .fc-airline-wrap { display: flex; flex-direction: column; gap: 8px; }
+        .fc-airline-name { font-weight: 700; font-size: 1.1rem; }
+        .fc-logo-placeholder { width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 5px; }
+
+        /* Timeline Route */
+        .fc-timeline { flex: 1; display: flex; align-items: center; gap: 20px; position: relative; }
+        .timeline-slot { text-align: center; }
+        .timeline-slot .time { font-family: 'Outfit'; font-size: 1.4rem; font-weight: 700; display: block; }
+        .timeline-slot .code { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+        
+        .timeline-bar-wrap { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .timeline-bar { width: 100%; height: 2px; background: rgba(255,255,255,0.1); position: relative; border-radius: 2px; }
+        .timeline-bar-progress { position: absolute; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, var(--accent-1), var(--accent-2)); border-radius: 2px; }
+        .timeline-plane { position: absolute; right: 0; top: -8px; font-size: 1.1rem; transform: rotate(45deg); }
+        .timeline-duration { font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; }
+        .timeline-stops { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; background: rgba(0,0,0,0.3); border-radius: 4px; }
+
+        .fc-price-wrap { text-align: right; display: flex; flex-direction: column; gap: 12px; }
+        .fc-price { font-family: 'Outfit'; font-size: 1.8rem; font-weight: 800; color: var(--accent-2); }
+        .buy-btn { 
+            background: #fff; color: #000; border: none; padding: 12px 20px; 
+            border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s;
+            text-decoration: none; display: inline-block; text-align: center;
+        }
+        .buy-btn:hover { background: var(--accent-2); color: #fff; }
+
+        /* Autocomplete dropdown (Sidebar style) */
+        .autocomplete-list {
+            position: absolute; top: 100%; left: 0; right: 0; background: #1a1e2e; 
+            border: 1px solid var(--border-glass); border-radius: 12px; z-index: 1000;
+            max-height: 300px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none;
         }
         .autocomplete-list.show { display: block; }
-        .ac-item {
-            padding: 12px 18px;
-            cursor: pointer;
-            font-size: 0.92rem;
-            display: flex; align-items: center; gap: 10px;
-            transition: background 0.15s;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-        }
-        .ac-item:hover, .ac-item.active { background: rgba(99,102,241,0.12); }
-        .ac-item .code {
-            font-weight: 700;
-            color: var(--accent-1);
-            font-size: 0.88rem;
-            min-width: 38px;
-        }
-        .ac-item .city { color: var(--text-secondary); }
+        .ac-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+        .ac-item:hover { background: rgba(99,102,241,0.1); }
+        .ac-item .code { font-weight: 800; color: var(--accent-1); margin-right: 10px; }
 
-        /* Swap button */
-        .swap-btn {
-            position: absolute;
-            right: -30px; top: 50%;
-            transform: translateY(-50%);
-            width: 40px; height: 40px;
-            background: var(--accent-1);
-            border: none; border-radius: 50%;
-            color: white; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 12px rgba(99,102,241,0.4);
-            transition: var(--transition);
-            z-index: 10;
+        /* Source Checkboxes (Sidebar) */
+        .source-grid { display: flex; flex-direction: column; gap: 10px; }
+        .source-check {
+            display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass);
+            border-radius: 12px; cursor: pointer; font-size: 0.82rem; transition: 0.2s;
         }
-        .swap-btn:hover { transform: translateY(-50%) rotate(180deg); background: var(--accent-2); }
+        .source-check:hover { background: rgba(255,255,255,0.06); }
+        .source-check input { accent-color: var(--accent-2); }
 
-        .search-btn {
-            width: 100%;
-            padding: 16px 32px;
-            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-            border: none;
-            border-radius: var(--radius-sm);
-            color: white;
-            font-size: 1.05rem;
-            font-weight: 600;
-            font-family: 'Outfit', sans-serif;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            letter-spacing: 0.3px;
+        /* Responsive Fixes */
+        @media (max-width: 1024px) {
+            body { grid-template-columns: 1fr; }
+            .sidebar { position: relative; height: auto; border-right: none; border-bottom: 1px solid var(--border-glass); flex-direction: row; overflow-x: auto; }
         }
-        .search-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(99,102,241,0.4);
-        }
-        .search-btn:disabled {
-            opacity: 0.6; cursor: not-allowed;
-        }
-
-        /* Spinner */
-        .spinner {
-            width: 20px; height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            display: none;
-        }
-        .search-btn.loading .spinner { display: block; }
-        .search-btn.loading .btn-text { display: none; }
-        .search-btn.loading .btn-loading { display: flex; align-items: center; gap: 10px; }
-        .btn-loading { display: none; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ── Results Section ──────────────────────────────────── */
-        .results-section { margin-bottom: 60px; }
-
-        .results-header {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 24px;
-            flex-wrap: wrap; gap: 16px;
-        }
-        .results-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.6rem;
-            font-weight: 700;
-        }
-        .results-count {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .results-actions { display: flex; gap: 12px; flex-wrap: wrap; }
-        .action-btn {
-            padding: 10px 20px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border-glass);
-            background: var(--bg-glass);
-            color: var(--text-secondary);
-            font-size: 0.88rem;
-            font-weight: 500;
-            cursor: pointer;
-            font-family: inherit;
-            display: flex; align-items: center; gap: 8px;
-            transition: var(--transition);
-        }
-        .action-btn:hover {
-            border-color: var(--accent-1);
-            color: var(--text-primary);
-            background: rgba(99,102,241,0.08);
-        }
-        .action-btn.primary {
-            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-            border: none;
-            color: white;
-        }
-        .action-btn.primary:hover { box-shadow: 0 4px 16px rgba(99,102,241,0.4); }
-
-        /* Sort bar */
-        .sort-bar {
-            display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
-        }
-        .sort-chip {
-            padding: 6px 16px;
-            border-radius: 100px;
-            border: 1px solid var(--border-glass);
-            background: transparent;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            font-weight: 500;
-            cursor: pointer;
-            font-family: inherit;
-            transition: var(--transition);
-        }
-        .sort-chip:hover { border-color: var(--accent-1); color: var(--text-secondary); }
-        .sort-chip.active {
-            background: var(--accent-1);
-            border-color: var(--accent-1);
-            color: white;
-        }
-
-        /* Flight card */
-        .flight-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius);
-            padding: 24px 28px;
-            margin-bottom: 14px;
-            display: grid;
-            grid-template-columns: 1fr 2fr 1fr;
-            align-items: center;
-            gap: 20px;
-            transition: var(--transition);
-            animation: cardSlideIn 0.5s ease both;
-        }
-        .flight-card:hover {
-            border-color: rgba(99,102,241,0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
-        }
-        .flight-card.cheapest {
-            border-color: var(--green);
-            box-shadow: 0 0 24px var(--green-glow);
-        }
-        @keyframes cardSlideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .fc-airline {
-            display: flex; flex-direction: column; gap: 4px;
-        }
-        .fc-airline-name {
-            font-weight: 600;
-            font-size: 1rem;
-        }
-        .fc-source {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            background: var(--bg-glass);
-            padding: 2px 10px;
-            border-radius: 100px;
-            display: inline-block;
-            width: fit-content;
-        }
-
-        .fc-route {
-            display: flex; align-items: center; gap: 16px;
-        }
-        .fc-time {
-            text-align: center;
-        }
-        .fc-time .time {
-            font-size: 1.3rem;
-            font-weight: 700;
-            font-family: 'Outfit', sans-serif;
-        }
-        .fc-time .code {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-        }
-        .fc-line {
-            flex: 1;
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-            position: relative;
-        }
-        .fc-duration {
-            font-size: 0.78rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        .fc-line-bar {
-            width: 100%; height: 2px;
-            background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
-            position: relative;
-            border-radius: 2px;
-        }
-        .fc-line-bar::after {
-            content: '✈';
-            position: absolute;
-            right: -4px; top: -9px;
-            font-size: 0.9rem;
-        }
-        .fc-stops {
-            font-size: 0.72rem;
-            font-weight: 500;
-        }
-        .fc-stops.nonstop { color: var(--green); }
-        .fc-stops.onestop { color: var(--amber); }
-        .fc-stops.multistop { color: var(--red); }
-
-        .fc-price-col {
-            text-align: right;
-            display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
-        }
-        .fc-price {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-        .cheapest-badge {
-            background: var(--green);
-            color: #fff;
-            font-size: 0.68rem;
-            font-weight: 700;
-            padding: 3px 10px;
-            border-radius: 100px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            animation: badgePulse 2s ease-in-out infinite;
-        }
-        @keyframes badgePulse {
-            0%, 100% { box-shadow: 0 0 0 0 var(--green-glow); }
-            50%      { box-shadow: 0 0 0 8px transparent; }
-        }
-        .fc-cabin {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-        }
-
-        /* ── Empty State ─────────────────────────────────────── */
-        .empty-state {
-            text-align: center;
-            padding: 80px 24px;
-        }
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 16px;
-            opacity: 0.6;
-        }
-        .empty-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-        .empty-text {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            max-width: 420px;
-            margin: 0 auto;
-        }
-
-        /* ── Error State ─────────────────────────────────────── */
-        .error-banner {
-            background: rgba(239, 68, 68, 0.08);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            border-radius: var(--radius-sm);
-            padding: 18px 24px;
-            margin-bottom: 24px;
-            color: #fca5a5;
-            display: flex; align-items: center; gap: 12px;
-            animation: cardSlideIn 0.4s ease both;
-        }
-        .error-banner .icon { font-size: 1.3rem; }
-
-        /* ── No API Warning ──────────────────────────────────── */
-        .api-warning {
-            background: rgba(245, 158, 11, 0.08);
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            border-radius: var(--radius-sm);
-            padding: 18px 24px;
-            margin-bottom: 24px;
-            color: #fcd34d;
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
-        .api-warning a { color: var(--amber); }
-
-        /* ── Email Modal ─────────────────────────────────────── */
-        .modal-overlay {
-            position: fixed; inset: 0; z-index: 1000;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(6px);
-            display: none;
-            align-items: center; justify-content: center;
-            padding: 24px;
-        }
-        .modal-overlay.show { display: flex; }
-        .modal {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius);
-            padding: 36px;
-            width: 100%;
-            max-width: 520px;
-            box-shadow: 0 24px 80px rgba(0,0,0,0.6);
-            animation: modalIn 0.3s ease;
-        }
-        @keyframes modalIn {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
-            to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .modal-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 24px;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .modal .form-group { margin-bottom: 16px; }
-        .modal-actions {
-            display: flex; gap: 12px; margin-top: 24px;
-        }
-        .modal-actions .action-btn { flex: 1; justify-content: center; padding: 14px; }
-
-        /* ── Footer ──────────────────────────────────────────── */
-        .footer {
-            text-align: center;
-            padding: 40px 0;
-            color: var(--text-muted);
-            font-size: 0.82rem;
-            border-top: 1px solid var(--border-glass);
-        }
-
-        /* ── Responsive ──────────────────────────────────────── */
-        @media (max-width: 768px) {
-            .header .logo { font-size: 2rem; }
-            .search-card { padding: 24px; }
-            .search-grid { grid-template-columns: 1fr; }
-            .swap-btn { display: none; }
-            .flight-card {
-                grid-template-columns: 1fr;
-                gap: 16px;
-                padding: 20px;
-            }
-            .fc-route { flex-direction: column; text-align: center; }
-            .fc-price-col { align-items: center; text-align: center; }
-            .results-header { flex-direction: column; align-items: flex-start; }
-        }
-
-        /* ── Scrollbar ───────────────────────────────────────── */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 
 <body>
     <div class="bg-mesh"></div>
-    <div class="grain"></div>
 
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <h1 class="logo">✈ SkyDeal</h1>
-            <p class="tagline">Real-time flight prices from multiple sources — find the cheapest deal instantly</p>
-            <div class="api-badges" id="apiBadges">
-                <span class="api-badge" id="badge-amadeus"><span class="dot"></span> Amadeus API</span>
-                <span class="api-badge" id="badge-serpapi"><span class="dot"></span> Google Flights</span>
-                <span class="api-badge" id="badge-scraper"><span class="dot"></span> Web Scraper</span>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo-wrap">
+            <span class="icon">✈</span> SkyDeal
+        </div>
+
+        <div class="sidebar-nav">
+            <div class="filter-group">
+                <h3 class="sidebar-section-title">Aggregator Status</h3>
+                <div class="sidebar-badges" id="apiBadges">
+                    <div class="api-badge" id="badge-amadeus"><span class="dot"></span> Amadeus API</div>
+                    <div class="api-badge" id="badge-serpapi"><span class="dot"></span> Google Flights</div>
+                    <div class="api-badge" id="badge-easemytrip"><span class="dot"></span> EaseMyTrip</div>
+                    <div class="api-badge" id="badge-cleartrip"><span class="dot"></span> Cleartrip</div>
+                </div>
             </div>
+
+            <div class="filter-group">
+                <h3 class="sidebar-section-title">Advanced Filters</h3>
+                
+                <!-- Price Range -->
+                <div class="price-range-wrap">
+                    <div class="price-labels">
+                        <span>Min: ₹<span id="label-min-price">0</span></span>
+                        <span>Max: ₹<span id="label-max-price">200k</span></span>
+                    </div>
+                    <input type="range" id="priceRange" min="0" max="250000" step="1000" value="250000">
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h3 class="sidebar-section-title">Departure Time</h3>
+                <div class="time-blocks" id="timeFilters">
+                    <div class="time-chip" data-time="morning">
+                        <span class="icon">🌅</span>
+                        <span>Morning</span>
+                    </div>
+                    <div class="time-chip" data-time="afternoon">
+                        <span class="icon">☀️</span>
+                        <span>Noon</span>
+                    </div>
+                    <div class="time-chip" data-time="evening">
+                        <span class="icon">🌆</span>
+                        <span>Evening</span>
+                    </div>
+                    <div class="time-chip" data-time="night">
+                        <span class="icon">🌙</span>
+                        <span>Night</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h3 class="sidebar-section-title">Source Filtering</h3>
+                <div class="source-grid" id="filterBar">
+                    <label class="source-check"><input type="checkbox" value="Amadeus" checked> Amadeus</label>
+                    <label class="source-check"><input type="checkbox" value="Google Flights" checked> Google Flights</label>
+                    <label class="source-check"><input type="checkbox" value="EaseMyTrip (Scraped)" checked> EaseMyTrip</label>
+                    <label class="source-check"><input type="checkbox" value="Cleartrip (Scraped)" checked> Cleartrip</label>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="search-hero">
+            <h2>Find your next adventure</h2>
+            <p style="color:var(--text-secondary);">Compare real-time prices across major travel engines instantly.</p>
         </header>
 
         <!-- Search Card -->
         <section class="search-card">
             <form id="searchForm" autocomplete="off">
                 <div class="search-grid">
-                    <div class="form-group" style="position:relative;">
+                    <div class="form-group">
                         <label for="origin">From</label>
-                        <input type="text" id="origin" placeholder="City or airport code (e.g. BOM)" required>
+                        <input type="text" id="origin" placeholder="Origin (e.g. BOM)" required>
                         <input type="hidden" id="originCode">
                         <div class="autocomplete-list" id="originAC"></div>
-                        <button type="button" class="swap-btn" id="swapBtn" title="Swap">⇄</button>
                     </div>
                     <div class="form-group">
                         <label for="destination">To</label>
-                        <input type="text" id="destination" placeholder="City or airport code (e.g. DEL)" required>
+                        <input type="text" id="destination" placeholder="Destination (e.g. LGW)" required>
                         <input type="hidden" id="destinationCode">
                         <div class="autocomplete-list" id="destinationAC"></div>
                     </div>
@@ -603,424 +302,266 @@
                         <input type="date" id="departure_date" required>
                     </div>
                     <div class="form-group">
-                        <label for="return_date">Return <span style="color:var(--text-muted);font-weight:400;text-transform:none">(optional)</span></label>
-                        <input type="date" id="return_date">
-                    </div>
-                    <div class="full">
                         <button type="submit" class="search-btn" id="searchBtn">
-                            <span class="btn-text">🔍 Search Best Prices</span>
-                            <span class="btn-loading"><span class="spinner"></span> Searching real-time prices…</span>
+                            <span class="btn-text">🔍 Search Flights</span>
+                            <span class="btn-loading">Searching...</span>
                         </button>
                     </div>
                 </div>
             </form>
         </section>
 
-        <!-- Results -->
+        <!-- Results Section -->
         <section class="results-section" id="resultsSection" style="display:none;">
             <div id="errorBanner"></div>
-            <div id="apiWarning"></div>
-
-            <div class="results-header">
+            
+            <div class="results-header" style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end;">
                 <div>
-                    <h2 class="results-title" id="resultsTitle">✈️ Flights Found</h2>
+                    <h2 class="results-title" id="resultsTitle">Results</h2>
                     <span class="results-count" id="resultsCount"></span>
                 </div>
-                <div class="results-actions" id="resultsActions" style="display:none;">
-                    <button class="action-btn primary" id="downloadBtn">📥 Download Excel</button>
-                    <button class="action-btn" id="emailBtn">📧 Email Report</button>
+                <div class="results-actions" id="resultsActions">
+                    <button class="action-btn" id="downloadBtn">📥 Download Excel</button>
+                    <button class="action-btn primary" id="emailBtn">📧 Email Report</button>
                 </div>
-            </div>
-
-            <div class="sort-bar" id="sortBar" style="display:none;">
-                <button class="sort-chip active" data-sort="price">💰 Price</button>
-                <button class="sort-chip" data-sort="duration">⏱ Duration</button>
-                <button class="sort-chip" data-sort="stops">🔗 Stops</button>
-                <button class="sort-chip" data-sort="airline">✈ Airline</button>
             </div>
 
             <div id="flightCards"></div>
+
+            <div class="pagination" id="pagination" style="margin-top: 40px; display: flex; justify-content: center; gap: 10px;"></div>
         </section>
 
-        <!-- Empty state (initial) -->
-        <section class="empty-state" id="emptyState">
-            <div class="empty-icon">🌍</div>
-            <h3 class="empty-title">Where are you flying?</h3>
-            <p class="empty-text">Enter your origin, destination and dates above to search real-time flight prices across multiple sources.</p>
-        </section>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>SkyDeal — Powered by Amadeus & Google Flights APIs · All prices in INR · Prices may vary at booking</p>
-        </footer>
-    </div>
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">📍</div>
+            <h3 class="empty-title">Ready to explore?</h3>
+            <p class="empty-text">Enter your trip details above to aggregate the best deals from multiple sources.</p>
+        </div>
+    </main>
 
     <!-- Email Modal -->
     <div class="modal-overlay" id="emailModal">
         <div class="modal">
-            <h3 class="modal-title">📧 Send Report via Email</h3>
-            <div class="form-group">
-                <label>Client Name</label>
-                <input type="text" id="emailClientName" placeholder="John Doe">
-            </div>
-            <div class="form-group">
-                <label>Recipient Email</label>
-                <input type="email" id="emailRecipient" placeholder="client@example.com">
-            </div>
-            <div class="form-group">
-                <label>Your Gmail Address</label>
-                <input type="email" id="emailSender" placeholder="you@gmail.com">
-            </div>
-            <div class="form-group">
-                <label>Gmail App Password</label>
-                <input type="password" id="emailPassword" placeholder="16-digit app password">
-            </div>
+            <h3 class="modal-title">📧 Send Itinerary</h3>
+            <div class="form-group"><label>Client Name</label><input type="text" id="emailClientName" placeholder="Client Name"></div>
+            <div class="form-group"><label>Recipient Email</label><input type="email" id="emailRecipient" placeholder="email@example.com"></div>
+            <div class="form-group"><label>Gmail Address</label><input type="email" id="emailSender" placeholder="your@gmail.com"></div>
+            <div class="form-group"><label>App Password</label><input type="password" id="emailPassword" placeholder="16-digit app password"></div>
             <div class="modal-actions">
                 <button class="action-btn" id="emailCancelBtn">Cancel</button>
-                <button class="action-btn primary" id="emailSendBtn">📤 Send</button>
+                <button class="action-btn primary" id="emailSendBtn">Send Itinerary</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ── State ──────────────────────────────────────────────────
         let currentFlights = [];
+        let filteredFlights = [];
+        let currentPageIndex = 0;
+        const resultsPerPage = 10;
         let currentExcelFile = '';
         let searchMeta = {};
+        let selectedTimeFilters = new Set();
+        let currentMaxPriceLimit = 250000;
 
-        // ── Init ───────────────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
-            // Set min dates to today
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('departure_date').min = today;
-            document.getElementById('return_date').min = today;
-
-            // Check API status
-            fetch('/api-status')
-                .then(r => r.json())
-                .then(status => {
-                    if (status.amadeus) document.getElementById('badge-amadeus').classList.add('active');
-                    if (status.serpapi) document.getElementById('badge-serpapi').classList.add('active');
-                    if (status.scraper) document.getElementById('badge-scraper').classList.add('active');
-                });
-
-            // Setup autocomplete
+            fetch('/api-status').then(r => r.json()).then(status => {
+                const badges = { 'amadeus': 'badge-amadeus', 'serpapi': 'badge-serpapi', 'easemytrip': 'badge-easemytrip', 'cleartrip': 'badge-cleartrip' };
+                for (const [key, id] of Object.entries(badges)) {
+                    const el = document.getElementById(id);
+                    if (el && status[key]) el.classList.add('active');
+                }
+            });
             setupAutocomplete('origin', 'originAC', 'originCode');
             setupAutocomplete('destination', 'destinationAC', 'destinationCode');
+            document.getElementById('searchForm').onsubmit = handleSearch;
 
-            // Swap button
-            document.getElementById('swapBtn').addEventListener('click', () => {
-                const o = document.getElementById('origin');
-                const d = document.getElementById('destination');
-                const oc = document.getElementById('originCode');
-                const dc = document.getElementById('destinationCode');
-                [o.value, d.value] = [d.value, o.value];
-                [oc.value, dc.value] = [dc.value, oc.value];
+            document.getElementById('priceRange').oninput = (e) => {
+                currentMaxPriceLimit = parseInt(e.target.value);
+                document.getElementById('label-max-price').textContent = (currentMaxPriceLimit / 1000).toFixed(0) + 'k';
+                applyFilters();
+            };
+
+            document.querySelectorAll('.time-chip').forEach(chip => {
+                chip.onclick = () => {
+                    const t = chip.dataset.time;
+                    selectedTimeFilters.has(t) ? selectedTimeFilters.delete(t) : selectedTimeFilters.add(t);
+                    chip.classList.toggle('active');
+                    applyFilters();
+                };
             });
 
-            // Search form
-            document.getElementById('searchForm').addEventListener('submit', handleSearch);
-
-            // Sort chips
-            document.querySelectorAll('.sort-chip').forEach(chip => {
-                chip.addEventListener('click', () => {
-                    document.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('active'));
-                    chip.classList.add('active');
-                    sortFlights(chip.dataset.sort);
-                });
-            });
-
-            // Download
-            document.getElementById('downloadBtn').addEventListener('click', () => {
-                if (currentExcelFile) {
-                    window.location.href = `/download/${currentExcelFile}`;
-                }
-            });
-
-            // Email modal
-            document.getElementById('emailBtn').addEventListener('click', () => {
-                document.getElementById('emailModal').classList.add('show');
-            });
-            document.getElementById('emailCancelBtn').addEventListener('click', () => {
-                document.getElementById('emailModal').classList.remove('show');
-            });
-            document.getElementById('emailSendBtn').addEventListener('click', handleSendEmail);
-
-            // Close modal on overlay click
-            document.getElementById('emailModal').addEventListener('click', (e) => {
-                if (e.target === e.currentTarget) {
-                    e.currentTarget.classList.remove('show');
-                }
-            });
+            document.querySelectorAll('#filterBar input').forEach(cb => cb.onchange = applyFilters);
+            document.getElementById('downloadBtn').onclick = () => currentExcelFile && (window.location.href = `/download/${currentExcelFile}`);
+            document.getElementById('emailBtn').onclick = () => document.getElementById('emailModal').classList.add('show');
+            document.getElementById('emailCancelBtn').onclick = () => document.getElementById('emailModal').classList.remove('show');
+            document.getElementById('emailSendBtn').onclick = handleSendEmail;
+            document.getElementById('emailModal').onclick = (e) => e.target === e.currentTarget && e.currentTarget.classList.remove('show');
         });
 
-        // ── Autocomplete ───────────────────────────────────────────
-        let acTimeout;
-        function setupAutocomplete(inputId, listId, hiddenId) {
-            const input = document.getElementById(inputId);
-            const list = document.getElementById(listId);
-            const hidden = document.getElementById(hiddenId);
-            let activeIdx = -1;
-
-            input.addEventListener('input', () => {
-                const q = input.value.trim();
-                if (q.length < 1) { list.classList.remove('show'); return; }
-
-                clearTimeout(acTimeout);
-                acTimeout = setTimeout(() => {
-                    fetch(`/airports?q=${encodeURIComponent(q)}`)
-                        .then(r => r.json())
-                        .then(airports => {
-                            activeIdx = -1;
-                            list.innerHTML = '';
-                            airports.forEach((ap, i) => {
-                                const item = document.createElement('div');
-                                item.className = 'ac-item';
-                                item.innerHTML = `<span class="code">${ap.code}</span><span class="city">${ap.city}</span>`;
-                                item.addEventListener('click', () => {
-                                    input.value = ap.label;
-                                    hidden.value = ap.code;
-                                    list.classList.remove('show');
-                                });
-                                list.appendChild(item);
-                            });
-                            list.classList.toggle('show', airports.length > 0);
+        function setupAutocomplete(id, listId, hid) {
+            const inp = document.getElementById(id), list = document.getElementById(listId), hidEl = document.getElementById(hid);
+            let timeout;
+            inp.oninput = () => {
+                const q = inp.value.trim();
+                if (q.length < 1) return list.classList.remove('show');
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    fetch(`/airports?q=${encodeURIComponent(q)}`).then(r => r.json()).then(data => {
+                        list.innerHTML = data.map(a => `<div class="ac-item" data-code="${a.code}" data-label="${a.label}"><span class="code">${a.code}</span><span class="city">${a.city}</span></div>`).join('');
+                        list.querySelectorAll('.ac-item').forEach(it => it.onclick = () => {
+                            inp.value = it.dataset.label; hidEl.value = it.dataset.code; list.classList.remove('show');
                         });
-                }, 180);
-            });
-
-            input.addEventListener('keydown', (e) => {
-                const items = list.querySelectorAll('.ac-item');
-                if (!items.length) return;
-                if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); }
-                else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); }
-                else if (e.key === 'Enter' && activeIdx >= 0) { e.preventDefault(); items[activeIdx].click(); return; }
-                else return;
-                items.forEach((it, i) => it.classList.toggle('active', i === activeIdx));
-                if (activeIdx >= 0) items[activeIdx].scrollIntoView({ block: 'nearest' });
-            });
-
-            input.addEventListener('blur', () => {
-                setTimeout(() => list.classList.remove('show'), 200);
-            });
+                        list.classList.toggle('show', data.length > 0);
+                    });
+                }, 150);
+            };
+            inp.onblur = () => setTimeout(() => list.classList.remove('show'), 200);
         }
 
-        // ── Search ─────────────────────────────────────────────────
         async function handleSearch(e) {
             e.preventDefault();
-
             const btn = document.getElementById('searchBtn');
-            btn.classList.add('loading');
-            btn.disabled = true;
-
+            btn.disabled = true; btn.querySelector('.btn-text').style.display = 'none'; btn.querySelector('.btn-loading').style.display = 'inline';
             document.getElementById('emptyState').style.display = 'none';
             document.getElementById('resultsSection').style.display = 'block';
-            document.getElementById('flightCards').innerHTML = '';
-            document.getElementById('errorBanner').innerHTML = '';
-            document.getElementById('apiWarning').innerHTML = '';
+            document.getElementById('flightCards').innerHTML = '<div style="text-align:center; padding:40px; opacity:0.6;">🔍 Aggregating best prices...</div>';
             document.getElementById('resultsActions').style.display = 'none';
-            document.getElementById('sortBar').style.display = 'none';
-            document.getElementById('resultsTitle').textContent = '⏳ Searching…';
-            document.getElementById('resultsCount').textContent = 'Querying Amadeus & Google Flights APIs…';
-
-            const originCode = document.getElementById('originCode').value || document.getElementById('origin').value.trim().toUpperCase().substring(0, 3);
-            const destCode = document.getElementById('destinationCode').value || document.getElementById('destination').value.trim().toUpperCase().substring(0, 3);
+            document.getElementById('resultsTitle').textContent = 'Searching...';
 
             searchMeta = {
-                origin: originCode,
-                destination: destCode,
+                origin: document.getElementById('originCode').value || document.getElementById('origin').value.substring(0,3).toUpperCase(),
+                destination: document.getElementById('destinationCode').value || document.getElementById('destination').value.substring(0,3).toUpperCase(),
                 departure_date: document.getElementById('departure_date').value,
-                return_date: document.getElementById('return_date').value,
             };
 
             try {
-                const res = await fetch('/search', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(searchMeta),
-                });
-
+                const res = await fetch('/search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(searchMeta) });
                 const data = await res.json();
-
-                if (!data.success) {
-                    showError(data.error || 'Search failed. Please try again.');
-                    return;
-                }
-
+                if (!data.success) throw new Error(data.error);
                 currentFlights = data.flights || [];
                 currentExcelFile = data.excel_file || '';
-
-                if (currentFlights.length === 0) {
-                    document.getElementById('resultsTitle').textContent = '😕 No Flights Found';
-                    document.getElementById('resultsCount').textContent = '';
-
-                    // Check if it's because no API keys
-                    const apiStatus = await fetch('/api-status').then(r => r.json());
-                    if (!apiStatus.amadeus && !apiStatus.serpapi) {
-                        document.getElementById('apiWarning').innerHTML = `
-                            <div class="api-warning">
-                                <strong>⚠️ No API keys configured.</strong><br>
-                                To get real flight data, add your API keys to a <code>.env</code> file:<br>
-                                • <strong>Amadeus</strong> (free 2000 calls/month): <a href="https://developers.amadeus.com" target="_blank">Sign up here</a><br>
-                                • <strong>SerpAPI</strong> (free 100 searches/month): <a href="https://serpapi.com" target="_blank">Sign up here</a><br><br>
-                                Copy <code>.env.example</code> to <code>.env</code> and add your keys.
-                            </div>
-                        `;
-                    }
-                    return;
+                if (currentFlights.length) {
+                    const maxFound = Math.max(...currentFlights.map(f => f.price));
+                    document.getElementById('priceRange').max = maxFound + 1000;
+                    document.getElementById('priceRange').value = maxFound + 1000;
+                    currentMaxPriceLimit = maxFound + 1000;
+                    document.getElementById('label-max-price').textContent = (currentMaxPriceLimit / 1000).toFixed(0) + 'k';
                 }
-
-                // Render results
-                document.getElementById('resultsTitle').textContent = `✈️ ${currentFlights.length} Flights Found`;
-                document.getElementById('resultsCount').textContent = `${searchMeta.origin} → ${searchMeta.destination} · ${formatDate(searchMeta.departure_date)}${searchMeta.return_date ? ' – ' + formatDate(searchMeta.return_date) : ' · One-way'}`;
+                applyFilters();
                 document.getElementById('resultsActions').style.display = 'flex';
-                document.getElementById('sortBar').style.display = 'flex';
-
-                renderFlights(currentFlights);
-
-            } catch (err) {
-                showError('Network error. Is the server running?');
-                console.error(err);
-            } finally {
-                btn.classList.remove('loading');
-                btn.disabled = false;
-            }
+            } catch (err) { showError(err.message); }
+            finally { btn.disabled = false; btn.querySelector('.btn-text').style.display = 'inline'; btn.querySelector('.btn-loading').style.display = 'none'; }
         }
 
-        // ── Render Flights ─────────────────────────────────────────
-        function renderFlights(flights) {
+        function applyFilters() {
+            const sources = Array.from(document.querySelectorAll('#filterBar input:checked')).map(cb => cb.value);
+            filteredFlights = currentFlights.filter(f => {
+                const matchSrc = sources.includes(f.source);
+                const matchPrice = f.price <= currentMaxPriceLimit;
+                let matchTime = true;
+                if (selectedTimeFilters.size) {
+                    const h = parseInt(f.departure_time.split(':')[0]);
+                    const p = h < 6 ? 'night' : h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
+                    matchTime = selectedTimeFilters.has(p);
+                }
+                return matchSrc && matchPrice && matchTime;
+            });
+            document.getElementById('resultsTitle').textContent = `Explore ${filteredFlights.length} Options`;
+            document.getElementById('resultsCount').textContent = `${searchMeta.origin} → ${searchMeta.destination} · ${formatDate(searchMeta.departure_date)}`;
+            currentPageIndex = 0;
+            renderFlights();
+        }
+
+        function renderFlights() {
             const container = document.getElementById('flightCards');
             container.innerHTML = '';
-
-            flights.forEach((f, i) => {
+            const results = filteredFlights.slice(currentPageIndex * resultsPerPage, (currentPageIndex + 1) * resultsPerPage);
+            if (!results.length) return container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;">No results matching filters.</div>';
+            results.forEach((f, i) => {
                 const card = document.createElement('div');
-                card.className = `flight-card${f.is_cheapest ? ' cheapest' : ''}`;
-                card.style.animationDelay = `${i * 0.06}s`;
-
-                const stopsNum = f.stops || 0;
-                let stopsClass = 'nonstop';
-                let stopsText = 'Non-stop';
-                if (stopsNum === 1) { stopsClass = 'onestop'; stopsText = '1 stop'; }
-                else if (stopsNum > 1) { stopsClass = 'multistop'; stopsText = `${stopsNum} stops`; }
-
+                card.className = 'flight-card';
+                card.style.animationDelay = `${i * 0.05}s`;
                 card.innerHTML = `
-                    <div class="fc-airline">
-                        <span class="fc-airline-name">${escapeHtml(f.airline || 'Unknown')}</span>
-                        ${f.booking_url ? `<a href="${escapeHtml(f.booking_url)}" target="_blank" class="fc-source" style="text-decoration:underline;">${escapeHtml(f.source || '')}</a>` : `<span class="fc-source">${escapeHtml(f.source || '')}</span>`}
+                    <div class="fc-airline-wrap">
+                        <div class="fc-logo-placeholder">✈️</div>
+                        <div class="fc-airline-name">${escapeHtml(f.airline)}</div>
+                        <div class="fc-source" style="font-size:0.7rem; opacity:0.6;">${escapeHtml(f.source)}</div>
                     </div>
-                    <div class="fc-route">
-                        <div class="fc-time">
-                            <div class="time">${formatTime(f.departure_time)}</div>
-                            <div class="code">${escapeHtml(f.origin)}</div>
+                    <div class="fc-timeline">
+                        <div class="timeline-slot"><span class="time">${formatTime(f.departure_time)}</span><span class="code">${f.origin}</span></div>
+                        <div class="timeline-bar-wrap">
+                            <span class="timeline-duration">${formatDuration(f.duration)}</span>
+                            <div class="timeline-bar"><div class="timeline-bar-progress"></div><div class="timeline-plane">✈</div></div>
+                            <span class="timeline-stops">${f.stops === 0 ? 'Direct' : f.stops + ' Stop' + (f.stops > 1 ? 's' : '')}</span>
                         </div>
-                        <div class="fc-line">
-                            <span class="fc-duration">${formatDuration(f.duration)}</span>
-                            <div class="fc-line-bar"></div>
-                            <span class="fc-stops ${stopsClass}">${stopsText}</span>
-                        </div>
-                        <div class="fc-time">
-                            <div class="time">${formatTime(f.arrival_time)}</div>
-                            <div class="code">${escapeHtml(f.destination)}</div>
-                        </div>
+                        <div class="timeline-slot"><span class="time">${formatTime(f.arrival_time)}</span><span class="code">${f.destination}</span></div>
                     </div>
-                    <div class="fc-price-col">
-                        <span class="fc-price">₹${Number(f.price).toLocaleString('en-IN')}</span>
-                        ${f.is_cheapest ? '<span class="cheapest-badge">Cheapest</span>' : ''}
-                        <span class="fc-cabin">${formatCabin(f.cabin_class)}</span>
-                    </div>
-                `;
+                    <div class="fc-price-wrap">
+                        <div class="fc-price">₹${Number(f.price).toLocaleString('en-IN')}</div>
+                        <a href="${f.booking_url || '#'}" target="_blank" class="buy-btn">View Deal</a>
+                        <div style="font-size:0.7rem; opacity:0.6; text-align:center;">${formatCabin(f.cabin_class)}</div>
+                    </div>`;
                 container.appendChild(card);
             });
+            renderPagination();
         }
 
-        // ── Sort ───────────────────────────────────────────────────
-        function sortFlights(by) {
-            const sorted = [...currentFlights];
-            switch (by) {
-                case 'price':
-                    sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
-                    break;
-                case 'duration':
-                    sorted.sort((a, b) => parseDuration(a.duration) - parseDuration(b.duration));
-                    break;
-                case 'stops':
-                    sorted.sort((a, b) => (a.stops || 0) - (b.stops || 0));
-                    break;
-                case 'airline':
-                    sorted.sort((a, b) => (a.airline || '').localeCompare(b.airline || ''));
-                    break;
+        function renderPagination() {
+            const container = document.getElementById('pagination');
+            const total = Math.ceil(filteredFlights.length / resultsPerPage);
+            container.innerHTML = '';
+            if (total <= 1) return;
+            for (let i = 0; i < total; i++) {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${i === currentPageIndex ? 'active' : ''}`;
+                btn.style = "padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border-glass); background: var(--bg-glass); color: #fff; cursor: pointer;";
+                btn.textContent = i + 1;
+                btn.onclick = () => { currentPageIndex = i; renderFlights(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+                container.appendChild(btn);
             }
-            renderFlights(sorted);
         }
 
-        // ── Email ──────────────────────────────────────────────────
         async function handleSendEmail() {
             const btn = document.getElementById('emailSendBtn');
-            btn.textContent = '⏳ Sending…';
-            btn.disabled = true;
-
+            btn.textContent = 'Sending...'; btn.disabled = true;
             try {
-                const cheapest = currentFlights[0];
-                const flightSummary = `<p style="color:#27ae60;font-size:1.3em;font-weight:bold">Best Price: ₹${Number(cheapest?.price || 0).toLocaleString('en-IN')}</p><p>${currentFlights.length} flights compared across ${[...new Set(currentFlights.map(f => f.source))].join(', ')}.</p>`;
-
-                const res = await fetch('/send-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        client_name: document.getElementById('emailClientName').value,
-                        recipient_email: document.getElementById('emailRecipient').value,
-                        sender_email: document.getElementById('emailSender').value,
-                        sender_password: document.getElementById('emailPassword').value,
-                        origin: searchMeta.origin,
-                        destination: searchMeta.destination,
-                        departure_date: searchMeta.departure_date,
-                        return_date: searchMeta.return_date,
-                        excel_file: currentExcelFile,
-                        flight_summary: flightSummary,
-                        hotel_summary: '<p>No hotel data in this report.</p>',
-                    }),
-                });
-
-                const data = await res.json();
-                if (data.success) {
-                    alert('✅ Email sent successfully!');
-                    document.getElementById('emailModal').classList.remove('show');
-                } else {
-                    alert('❌ Failed: ' + (data.error || 'Unknown error'));
-                }
-            } catch (err) {
-                alert('❌ Network error');
-            } finally {
-                btn.textContent = '📤 Send';
-                btn.disabled = false;
-            }
+                const res = await fetch('/send-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+                    client_name: document.getElementById('emailClientName').value,
+                    recipient_email: document.getElementById('emailRecipient').value,
+                    sender_email: document.getElementById('emailSender').value,
+                    sender_password: document.getElementById('emailPassword').value,
+                    origin: searchMeta.origin, destination: searchMeta.destination, departure_date: searchMeta.departure_date,
+                    excel_file: currentExcelFile,
+                    flight_summary: `Best Price: ₹${Number(filteredFlights[0]?.price || 0).toLocaleString('en-IN')}`,
+                    hotel_summary: 'N/A'
+                })});
+                if ((await res.json()).success) alert('✅ Success!');
+                else alert('❌ Error sending email');
+            } catch (err) { alert('❌ Network error'); } finally { btn.textContent = 'Send Itinerary'; btn.disabled = false; }
         }
 
-        // ── Helpers ────────────────────────────────────────────────
-        function showError(msg) {
-            document.getElementById('resultsTitle').textContent = '⚠️ Error';
-            document.getElementById('resultsCount').textContent = '';
-            document.getElementById('errorBanner').innerHTML = `<div class="error-banner"><span class="icon">⚠️</span><span>${escapeHtml(msg)}</span></div>`;
+        function showError(m) { 
+            document.getElementById('resultsTitle').textContent = 'Error'; 
+            document.getElementById('flightCards').innerHTML = `<div style="grid-column: 1/-1; padding: 20px; border-radius: 12px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">⚠️ ${escapeHtml(m)}</div>`; 
         }
-
-        function formatTime(t) {
-            if (!t) return '—';
-            if (t.includes('T')) {
-                try { return new Date(t).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }); } catch {}
-            }
-            if (t.includes(':')) return t.substring(0, 5);
-            return t;
-        }
-
+        function formatTime(t) { return t ? (t.includes(':') ? t.substring(0, 5) : t) : '—'; }
         function formatDuration(d) {
             if (!d) return '—';
             const m = d.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
             if (m) return `${m[1] || 0}h ${m[2] || 0}m`;
             return d;
         }
-
-        function parseDuration(d) {
-            if (!d) return 9999;
+        function formatDate(d) { return d ? new Date(d + 'T00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : ''; }
+        function formatCabin(c) { 
+            const map = { 'ECONOMY': 'Economy', 'PREMIUM_ECONOMY': 'Premium Eco', 'BUSINESS': 'Business', 'FIRST': 'First' };
+            return map[c] || (c ? c.charAt(0) + c.slice(1).toLowerCase() : ''); 
+        }
+        function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+    </script>
+</body>
             const m = d.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
             if (m) return (parseInt(m[1] || 0) * 60) + parseInt(m[2] || 0);
             return 9999;
