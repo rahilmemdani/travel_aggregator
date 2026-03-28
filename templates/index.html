@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Search and compare real-time flight prices from multiple sources. Find the cheapest flights instantly.">
+    <title>SkyDeal — Real-Time Flight Price Aggregator</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ── Reset & Variables ────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, 0.65);
+            --bg-glass: rgba(255, 255, 255, 0.04);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-1: #6366f1;
+            --accent-2: #8b5cf6;
+            --accent-3: #ec4899;
+            --green: #10b981;
+            --green-glow: rgba(16, 185, 129, 0.25);
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ── Animated Background ─────────────────────────────── */
+        .bg-mesh {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(99,102,241,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 80% at 80% 90%, rgba(139,92,246,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 50% 50%, rgba(236,72,153,0.06) 0%, transparent 70%);
+            animation: meshFloat 20s ease-in-out infinite alternate;
+        }
+        @keyframes meshFloat {
+            0%   { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-30px) scale(1.05); }
+        }
+
+        .grain {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* ── Container ───────────────────────────────────────── */
+        .container {
+            position: relative; z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ── Header ──────────────────────────────────────────── */
+        .header {
+            padding: 48px 0 32px;
+            text-align: center;
+        }
+        .header .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2), var(--accent-3));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -1px;
+        }
+        .header .tagline {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin-top: 8px;
+            font-weight: 300;
+        }
+        .api-badges {
+            display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap;
+        }
+        .api-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 14px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+        .api-badge.active { border-color: var(--green); color: var(--green); }
+        .api-badge .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--text-muted);
+        }
+        .api-badge.active .dot {
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green-glow);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ── Search Card ─────────────────────────────────────── */
+        .search-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px) saturate(1.4);
+            -webkit-backdrop-filter: blur(24px) saturate(1.4);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius);
+            padding: 36px;
+            box-shadow: var(--shadow);
+            margin-bottom: 40px;
+        }
+        .search-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .search-grid .full { grid-column: 1 / -1; }
+
+        .form-group { position: relative; }
+        .form-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: var(--transition);
+            outline: none;
+        }
+        .form-group input::placeholder { color: var(--text-muted); }
+        .form-group input:focus {
+            border-color: var(--accent-1);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+        }
+
+        /* Autocomplete dropdown */
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0; right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            max-height: 240px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+        }
+        .autocomplete-list.show { display: block; }
+        .ac-item {
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 0.92rem;
+            display: flex; align-items: center; gap: 10px;
+            transition: background 0.15s;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .ac-item:hover, .ac-item.active { background: rgba(99,102,241,0.12); }
+        .ac-item .code {
+            font-weight: 700;
+            color: var(--accent-1);
+            font-size: 0.88rem;
+            min-width: 38px;
+        }
+        .ac-item .city { color: var(--text-secondary); }
+
+        /* Swap button */
+        .swap-btn {
+            position: absolute;
+            right: -30px; top: 50%;
+            transform: translateY(-50%);
+            width: 40px; height: 40px;
+            background: var(--accent-1);
+            border: none; border-radius: 50%;
+            color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+            transition: var(--transition);
+            z-index: 10;
+        }
+        .swap-btn:hover { transform: translateY(-50%) rotate(180deg); background: var(--accent-2); }
+
+        .search-btn {
+            width: 100%;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            border: none;
+            border-radius: var(--radius-sm);
+            color: white;
+            font-size: 1.05rem;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            letter-spacing: 0.3px;
+        }
+        .search-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+        }
+        .search-btn:disabled {
+            opacity: 0.6; cursor: not-allowed;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: none;
+        }
+        .search-btn.loading .spinner { display: block; }
+        .search-btn.loading .btn-text { display: none; }
+        .search-btn.loading .btn-loading { display: flex; align-items: center; gap: 10px; }
+        .btn-loading { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Results Section ──────────────────────────────────── */
+        .results-section { margin-bottom: 60px; }
+
+        .results-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap; gap: 16px;
+        }
+        .results-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+        .results-count {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .results-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .action-btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-glass);
+            background: var(--bg-glass);
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex; align-items: center; gap: 8px;
+            transition: var(--transition);
+        }
+        .action-btn:hover {
+            border-color: var(--accent-1);
+            color: var(--text-primary);
+            background: rgba(99,102,241,0.08);
+        }
+        .action-btn.primary {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            border: none;
+            color: white;
+        }
+        .action-btn.primary:hover { box-shadow: 0 4px 16px rgba(99,102,241,0.4); }
+
+        /* Sort bar */
+        .sort-bar {
+            display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .sort-chip {
+            padding: 6px 16px;
+            border-radius: 100px;
+            border: 1px solid var(--border-glass);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+        .sort-chip:hover { border-color: var(--accent-1); color: var(--text-secondary); }
+        .sort-chip.active {
+            background: var(--accent-1);
+            border-color: var(--accent-1);
+            color: white;
+        }
+
+        /* Flight card */
+        .flight-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            margin-bottom: 14px;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            align-items: center;
+            gap: 20px;
+            transition: var(--transition);
+            animation: cardSlideIn 0.5s ease both;
+        }
+        .flight-card:hover {
+            border-color: rgba(99,102,241,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+        .flight-card.cheapest {
+            border-color: var(--green);
+            box-shadow: 0 0 24px var(--green-glow);
+        }
+        @keyframes cardSlideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .fc-airline {
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .fc-airline-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .fc-source {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg-glass);
+            padding: 2px 10px;
+            border-radius: 100px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .fc-route {
+            display: flex; align-items: center; gap: 16px;
+        }
+        .fc-time {
+            text-align: center;
+        }
+        .fc-time .time {
+            font-size: 1.3rem;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+        }
+        .fc-time .code {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .fc-line {
+            flex: 1;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            position: relative;
+        }
+        .fc-duration {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .fc-line-bar {
+            width: 100%; height: 2px;
+            background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+            position: relative;
+            border-radius: 2px;
+        }
+        .fc-line-bar::after {
+            content: '✈';
+            position: absolute;
+            right: -4px; top: -9px;
+            font-size: 0.9rem;
+        }
+        .fc-stops {
+            font-size: 0.72rem;
+            font-weight: 500;
+        }
+        .fc-stops.nonstop { color: var(--green); }
+        .fc-stops.onestop { color: var(--amber); }
+        .fc-stops.multistop { color: var(--red); }
+
+        .fc-price-col {
+            text-align: right;
+            display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+        }
+        .fc-price {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .cheapest-badge {
+            background: var(--green);
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 0 0 var(--green-glow); }
+            50%      { box-shadow: 0 0 0 8px transparent; }
+        }
+        .fc-cabin {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* ── Empty State ─────────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 80px 24px;
+        }
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+        .empty-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .empty-text {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        /* ── Error State ─────────────────────────────────────── */
+        .error-banner {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 18px 24px;
+            margin-bottom: 24px;
+            color: #fca5a5;
+            display: flex; align-items: center; gap: 12px;
+            animation: cardSlideIn 0.4s ease both;
+        }
+        .error-banner .icon { font-size: 1.3rem; }
+
+        /* ── No API Warning ──────────────────────────────────── */
+        .api-warning {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 18px 24px;
+            margin-bottom: 24px;
+            color: #fcd34d;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .api-warning a { color: var(--amber); }
+
+        /* ── Email Modal ─────────────────────────────────────── */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center; justify-content: center;
+            padding: 24px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius);
+            padding: 36px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .modal .form-group { margin-bottom: 16px; }
+        .modal-actions {
+            display: flex; gap: 12px; margin-top: 24px;
+        }
+        .modal-actions .action-btn { flex: 1; justify-content: center; padding: 14px; }
+
+        /* ── Footer ──────────────────────────────────────────── */
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            border-top: 1px solid var(--border-glass);
+        }
+
+        /* ── Responsive ──────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .header .logo { font-size: 2rem; }
+            .search-card { padding: 24px; }
+            .search-grid { grid-template-columns: 1fr; }
+            .swap-btn { display: none; }
+            .flight-card {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                padding: 20px;
+            }
+            .fc-route { flex-direction: column; text-align: center; }
+            .fc-price-col { align-items: center; text-align: center; }
+            .results-header { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ── Scrollbar ───────────────────────────────────────── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    </style>
+</head>
+
+<body>
+    <div class="bg-mesh"></div>
+    <div class="grain"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">✈ SkyDeal</h1>
+            <p class="tagline">Real-time flight prices from multiple sources — find the cheapest deal instantly</p>
+            <div class="api-badges" id="apiBadges">
+                <span class="api-badge" id="badge-amadeus"><span class="dot"></span> Amadeus API</span>
+                <span class="api-badge" id="badge-serpapi"><span class="dot"></span> Google Flights</span>
+                <span class="api-badge" id="badge-scraper"><span class="dot"></span> Web Scraper</span>
+            </div>
+        </header>
+
+        <!-- Search Card -->
+        <section class="search-card">
+            <form id="searchForm" autocomplete="off">
+                <div class="search-grid">
+                    <div class="form-group" style="position:relative;">
+                        <label for="origin">From</label>
+                        <input type="text" id="origin" placeholder="City or airport code (e.g. BOM)" required>
+                        <input type="hidden" id="originCode">
+                        <div class="autocomplete-list" id="originAC"></div>
+                        <button type="button" class="swap-btn" id="swapBtn" title="Swap">⇄</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="destination">To</label>
+                        <input type="text" id="destination" placeholder="City or airport code (e.g. DEL)" required>
+                        <input type="hidden" id="destinationCode">
+                        <div class="autocomplete-list" id="destinationAC"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="departure_date">Departure</label>
+                        <input type="date" id="departure_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="return_date">Return <span style="color:var(--text-muted);font-weight:400;text-transform:none">(optional)</span></label>
+                        <input type="date" id="return_date">
+                    </div>
+                    <div class="full">
+                        <button type="submit" class="search-btn" id="searchBtn">
+                            <span class="btn-text">🔍 Search Best Prices</span>
+                            <span class="btn-loading"><span class="spinner"></span> Searching real-time prices…</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- Results -->
+        <section class="results-section" id="resultsSection" style="display:none;">
+            <div id="errorBanner"></div>
+            <div id="apiWarning"></div>
+
+            <div class="results-header">
+                <div>
+                    <h2 class="results-title" id="resultsTitle">✈️ Flights Found</h2>
+                    <span class="results-count" id="resultsCount"></span>
+                </div>
+                <div class="results-actions" id="resultsActions" style="display:none;">
+                    <button class="action-btn primary" id="downloadBtn">📥 Download Excel</button>
+                    <button class="action-btn" id="emailBtn">📧 Email Report</button>
+                </div>
+            </div>
+
+            <div class="sort-bar" id="sortBar" style="display:none;">
+                <button class="sort-chip active" data-sort="price">💰 Price</button>
+                <button class="sort-chip" data-sort="duration">⏱ Duration</button>
+                <button class="sort-chip" data-sort="stops">🔗 Stops</button>
+                <button class="sort-chip" data-sort="airline">✈ Airline</button>
+            </div>
+
+            <div id="flightCards"></div>
+        </section>
+
+        <!-- Empty state (initial) -->
+        <section class="empty-state" id="emptyState">
+            <div class="empty-icon">🌍</div>
+            <h3 class="empty-title">Where are you flying?</h3>
+            <p class="empty-text">Enter your origin, destination and dates above to search real-time flight prices across multiple sources.</p>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>SkyDeal — Powered by Amadeus & Google Flights APIs · All prices in INR · Prices may vary at booking</p>
+        </footer>
+    </div>
+
+    <!-- Email Modal -->
+    <div class="modal-overlay" id="emailModal">
+        <div class="modal">
+            <h3 class="modal-title">📧 Send Report via Email</h3>
+            <div class="form-group">
+                <label>Client Name</label>
+                <input type="text" id="emailClientName" placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label>Recipient Email</label>
+                <input type="email" id="emailRecipient" placeholder="client@example.com">
+            </div>
+            <div class="form-group">
+                <label>Your Gmail Address</label>
+                <input type="email" id="emailSender" placeholder="you@gmail.com">
+            </div>
+            <div class="form-group">
+                <label>Gmail App Password</label>
+                <input type="password" id="emailPassword" placeholder="16-digit app password">
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn" id="emailCancelBtn">Cancel</button>
+                <button class="action-btn primary" id="emailSendBtn">📤 Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── State ──────────────────────────────────────────────────
+        let currentFlights = [];
+        let currentExcelFile = '';
+        let searchMeta = {};
+
+        // ── Init ───────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set min dates to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('departure_date').min = today;
+            document.getElementById('return_date').min = today;
+
+            // Check API status
+            fetch('/api-status')
+                .then(r => r.json())
+                .then(status => {
+                    if (status.amadeus) document.getElementById('badge-amadeus').classList.add('active');
+                    if (status.serpapi) document.getElementById('badge-serpapi').classList.add('active');
+                    if (status.scraper) document.getElementById('badge-scraper').classList.add('active');
+                });
+
+            // Setup autocomplete
+            setupAutocomplete('origin', 'originAC', 'originCode');
+            setupAutocomplete('destination', 'destinationAC', 'destinationCode');
+
+            // Swap button
+            document.getElementById('swapBtn').addEventListener('click', () => {
+                const o = document.getElementById('origin');
+                const d = document.getElementById('destination');
+                const oc = document.getElementById('originCode');
+                const dc = document.getElementById('destinationCode');
+                [o.value, d.value] = [d.value, o.value];
+                [oc.value, dc.value] = [dc.value, oc.value];
+            });
+
+            // Search form
+            document.getElementById('searchForm').addEventListener('submit', handleSearch);
+
+            // Sort chips
+            document.querySelectorAll('.sort-chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    document.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    sortFlights(chip.dataset.sort);
+                });
+            });
+
+            // Download
+            document.getElementById('downloadBtn').addEventListener('click', () => {
+                if (currentExcelFile) {
+                    window.location.href = `/download/${currentExcelFile}`;
+                }
+            });
+
+            // Email modal
+            document.getElementById('emailBtn').addEventListener('click', () => {
+                document.getElementById('emailModal').classList.add('show');
+            });
+            document.getElementById('emailCancelBtn').addEventListener('click', () => {
+                document.getElementById('emailModal').classList.remove('show');
+            });
+            document.getElementById('emailSendBtn').addEventListener('click', handleSendEmail);
+
+            // Close modal on overlay click
+            document.getElementById('emailModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    e.currentTarget.classList.remove('show');
+                }
+            });
+        });
+
+        // ── Autocomplete ───────────────────────────────────────────
+        let acTimeout;
+        function setupAutocomplete(inputId, listId, hiddenId) {
+            const input = document.getElementById(inputId);
+            const list = document.getElementById(listId);
+            const hidden = document.getElementById(hiddenId);
+            let activeIdx = -1;
+
+            input.addEventListener('input', () => {
+                const q = input.value.trim();
+                if (q.length < 1) { list.classList.remove('show'); return; }
+
+                clearTimeout(acTimeout);
+                acTimeout = setTimeout(() => {
+                    fetch(`/airports?q=${encodeURIComponent(q)}`)
+                        .then(r => r.json())
+                        .then(airports => {
+                            activeIdx = -1;
+                            list.innerHTML = '';
+                            airports.forEach((ap, i) => {
+                                const item = document.createElement('div');
+                                item.className = 'ac-item';
+                                item.innerHTML = `<span class="code">${ap.code}</span><span class="city">${ap.city}</span>`;
+                                item.addEventListener('click', () => {
+                                    input.value = ap.label;
+                                    hidden.value = ap.code;
+                                    list.classList.remove('show');
+                                });
+                                list.appendChild(item);
+                            });
+                            list.classList.toggle('show', airports.length > 0);
+                        });
+                }, 180);
+            });
+
+            input.addEventListener('keydown', (e) => {
+                const items = list.querySelectorAll('.ac-item');
+                if (!items.length) return;
+                if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); }
+                else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); }
+                else if (e.key === 'Enter' && activeIdx >= 0) { e.preventDefault(); items[activeIdx].click(); return; }
+                else return;
+                items.forEach((it, i) => it.classList.toggle('active', i === activeIdx));
+                if (activeIdx >= 0) items[activeIdx].scrollIntoView({ block: 'nearest' });
+            });
+
+            input.addEventListener('blur', () => {
+                setTimeout(() => list.classList.remove('show'), 200);
+            });
+        }
+
+        // ── Search ─────────────────────────────────────────────────
+        async function handleSearch(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('searchBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('flightCards').innerHTML = '';
+            document.getElementById('errorBanner').innerHTML = '';
+            document.getElementById('apiWarning').innerHTML = '';
+            document.getElementById('resultsActions').style.display = 'none';
+            document.getElementById('sortBar').style.display = 'none';
+            document.getElementById('resultsTitle').textContent = '⏳ Searching…';
+            document.getElementById('resultsCount').textContent = 'Querying Amadeus & Google Flights APIs…';
+
+            const originCode = document.getElementById('originCode').value || document.getElementById('origin').value.trim().toUpperCase().substring(0, 3);
+            const destCode = document.getElementById('destinationCode').value || document.getElementById('destination').value.trim().toUpperCase().substring(0, 3);
+
+            searchMeta = {
+                origin: originCode,
+                destination: destCode,
+                departure_date: document.getElementById('departure_date').value,
+                return_date: document.getElementById('return_date').value,
+            };
+
+            try {
+                const res = await fetch('/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(searchMeta),
+                });
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    showError(data.error || 'Search failed. Please try again.');
+                    return;
+                }
+
+                currentFlights = data.flights || [];
+                currentExcelFile = data.excel_file || '';
+
+                if (currentFlights.length === 0) {
+                    document.getElementById('resultsTitle').textContent = '😕 No Flights Found';
+                    document.getElementById('resultsCount').textContent = '';
+
+                    // Check if it's because no API keys
+                    const apiStatus = await fetch('/api-status').then(r => r.json());
+                    if (!apiStatus.amadeus && !apiStatus.serpapi) {
+                        document.getElementById('apiWarning').innerHTML = `
+                            <div class="api-warning">
+                                <strong>⚠️ No API keys configured.</strong><br>
+                                To get real flight data, add your API keys to a <code>.env</code> file:<br>
+                                • <strong>Amadeus</strong> (free 2000 calls/month): <a href="https://developers.amadeus.com" target="_blank">Sign up here</a><br>
+                                • <strong>SerpAPI</strong> (free 100 searches/month): <a href="https://serpapi.com" target="_blank">Sign up here</a><br><br>
+                                Copy <code>.env.example</code> to <code>.env</code> and add your keys.
+                            </div>
+                        `;
+                    }
+                    return;
+                }
+
+                // Render results
+                document.getElementById('resultsTitle').textContent = `✈️ ${currentFlights.length} Flights Found`;
+                document.getElementById('resultsCount').textContent = `${searchMeta.origin} → ${searchMeta.destination} · ${formatDate(searchMeta.departure_date)}${searchMeta.return_date ? ' – ' + formatDate(searchMeta.return_date) : ' · One-way'}`;
+                document.getElementById('resultsActions').style.display = 'flex';
+                document.getElementById('sortBar').style.display = 'flex';
+
+                renderFlights(currentFlights);
+
+            } catch (err) {
+                showError('Network error. Is the server running?');
+                console.error(err);
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        // ── Render Flights ─────────────────────────────────────────
+        function renderFlights(flights) {
+            const container = document.getElementById('flightCards');
+            container.innerHTML = '';
+
+            flights.forEach((f, i) => {
+                const card = document.createElement('div');
+                card.className = `flight-card${f.is_cheapest ? ' cheapest' : ''}`;
+                card.style.animationDelay = `${i * 0.06}s`;
+
+                const stopsNum = f.stops || 0;
+                let stopsClass = 'nonstop';
+                let stopsText = 'Non-stop';
+                if (stopsNum === 1) { stopsClass = 'onestop'; stopsText = '1 stop'; }
+                else if (stopsNum > 1) { stopsClass = 'multistop'; stopsText = `${stopsNum} stops`; }
+
+                card.innerHTML = `
+                    <div class="fc-airline">
+                        <span class="fc-airline-name">${escapeHtml(f.airline || 'Unknown')}</span>
+                        ${f.booking_url ? `<a href="${escapeHtml(f.booking_url)}" target="_blank" class="fc-source" style="text-decoration:underline;">${escapeHtml(f.source || '')}</a>` : `<span class="fc-source">${escapeHtml(f.source || '')}</span>`}
+                    </div>
+                    <div class="fc-route">
+                        <div class="fc-time">
+                            <div class="time">${formatTime(f.departure_time)}</div>
+                            <div class="code">${escapeHtml(f.origin)}</div>
+                        </div>
+                        <div class="fc-line">
+                            <span class="fc-duration">${formatDuration(f.duration)}</span>
+                            <div class="fc-line-bar"></div>
+                            <span class="fc-stops ${stopsClass}">${stopsText}</span>
+                        </div>
+                        <div class="fc-time">
+                            <div class="time">${formatTime(f.arrival_time)}</div>
+                            <div class="code">${escapeHtml(f.destination)}</div>
+                        </div>
+                    </div>
+                    <div class="fc-price-col">
+                        <span class="fc-price">₹${Number(f.price).toLocaleString('en-IN')}</span>
+                        ${f.is_cheapest ? '<span class="cheapest-badge">Cheapest</span>' : ''}
+                        <span class="fc-cabin">${formatCabin(f.cabin_class)}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ── Sort ───────────────────────────────────────────────────
+        function sortFlights(by) {
+            const sorted = [...currentFlights];
+            switch (by) {
+                case 'price':
+                    sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
+                    break;
+                case 'duration':
+                    sorted.sort((a, b) => parseDuration(a.duration) - parseDuration(b.duration));
+                    break;
+                case 'stops':
+                    sorted.sort((a, b) => (a.stops || 0) - (b.stops || 0));
+                    break;
+                case 'airline':
+                    sorted.sort((a, b) => (a.airline || '').localeCompare(b.airline || ''));
+                    break;
+            }
+            renderFlights(sorted);
+        }
+
+        // ── Email ──────────────────────────────────────────────────
+        async function handleSendEmail() {
+            const btn = document.getElementById('emailSendBtn');
+            btn.textContent = '⏳ Sending…';
+            btn.disabled = true;
+
+            try {
+                const cheapest = currentFlights[0];
+                const flightSummary = `<p style="color:#27ae60;font-size:1.3em;font-weight:bold">Best Price: ₹${Number(cheapest?.price || 0).toLocaleString('en-IN')}</p><p>${currentFlights.length} flights compared across ${[...new Set(currentFlights.map(f => f.source))].join(', ')}.</p>`;
+
+                const res = await fetch('/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_name: document.getElementById('emailClientName').value,
+                        recipient_email: document.getElementById('emailRecipient').value,
+                        sender_email: document.getElementById('emailSender').value,
+                        sender_password: document.getElementById('emailPassword').value,
+                        origin: searchMeta.origin,
+                        destination: searchMeta.destination,
+                        departure_date: searchMeta.departure_date,
+                        return_date: searchMeta.return_date,
+                        excel_file: currentExcelFile,
+                        flight_summary: flightSummary,
+                        hotel_summary: '<p>No hotel data in this report.</p>',
+                    }),
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert('✅ Email sent successfully!');
+                    document.getElementById('emailModal').classList.remove('show');
+                } else {
+                    alert('❌ Failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (err) {
+                alert('❌ Network error');
+            } finally {
+                btn.textContent = '📤 Send';
+                btn.disabled = false;
+            }
+        }
+
+        // ── Helpers ────────────────────────────────────────────────
+        function showError(msg) {
+            document.getElementById('resultsTitle').textContent = '⚠️ Error';
+            document.getElementById('resultsCount').textContent = '';
+            document.getElementById('errorBanner').innerHTML = `<div class="error-banner"><span class="icon">⚠️</span><span>${escapeHtml(msg)}</span></div>`;
+        }
+
+        function formatTime(t) {
+            if (!t) return '—';
+            if (t.includes('T')) {
+                try { return new Date(t).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }); } catch {}
+            }
+            if (t.includes(':')) return t.substring(0, 5);
+            return t;
+        }
+
+        function formatDuration(d) {
+            if (!d) return '—';
+            const m = d.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+            if (m) return `${m[1] || 0}h ${m[2] || 0}m`;
+            return d;
+        }
+
+        function parseDuration(d) {
+            if (!d) return 9999;
+            const m = d.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+            if (m) return (parseInt(m[1] || 0) * 60) + parseInt(m[2] || 0);
+            return 9999;
+        }
+
+        function formatDate(d) {
+            if (!d) return '';
+            try { return new Date(d + 'T00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return d; }
+        }
+
+        function formatCabin(c) {
+            if (!c) return '';
+            const map = { 'ECONOMY': 'Economy', 'PREMIUM_ECONOMY': 'Premium Eco', 'BUSINESS': 'Business', 'FIRST': 'First' };
+            return map[c] || c.charAt(0) + c.slice(1).toLowerCase();
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+    </script>
+</body>
+
+</html>
